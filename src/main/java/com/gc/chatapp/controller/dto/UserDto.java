@@ -13,7 +13,18 @@ public class UserDto {
 	private String phoneNo;
 	private String emailId;
 	private String profilePictureUrl;
+	private String sessionId;
+	// to indicate login status, can be removed later
+	private boolean userStatus = false;
 	
+	public boolean isUserStatus() {
+		return userStatus;
+	}
+
+	public void setUserStatus(boolean userStatus) {
+		this.userStatus = userStatus;
+	}
+
 	private List<User>chatContacts = new ArrayList<>();
 
 	public UserDto() {
@@ -75,5 +86,22 @@ public class UserDto {
 	public void setChatContacts(List<User> chatContacts) {
 		this.chatContacts = chatContacts;
 	}
+	
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	@Override
+	public String toString() {
+		return "UserDto [userId=" + userId + ", fullName=" + fullName + ", password=" + password + ", phoneNo="
+				+ phoneNo + ", emailId=" + emailId + ", profilePictureUrl=" + profilePictureUrl + ", sessionId="
+				+ sessionId + ", userStatus=" + userStatus + ", chatContacts=" + chatContacts + "]";
+	}
+
+	
 
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.gc.chatapp.controller.dto.UserDto;
 import com.gc.chatapp.entities.User;
 import com.gc.chatapp.service.UserService;
 import com.gc.chatapp.util.Emailer;
+import com.google.gson.Gson;
 
 @Controller
 
@@ -93,7 +96,7 @@ public class UserController {
 
 		String cppErrorMessage = "";
 		String cppSuccessMessage = "";
-		
+
 		String globalErrorMessage = "";
 		String globalSuccessMessage = "";
 
@@ -105,7 +108,7 @@ public class UserController {
 		user.setPhoneNo(phoneNo);
 
 		//add user to CPP application db
-		
+
 		// prepare request JSON
 		JSONObject requestJson=new JSONObject();
 		try{	
@@ -136,7 +139,8 @@ public class UserController {
 
 		try {
 			response = restTemplate.exchange(url, HttpMethod.PUT, entity, Object.class);
-			if(response.getStatusCode().value()== 204){
+			if(response.getStatusCode().value()== 200){
+				
 				cppErrorMessage = "";
 				//model.addAttribute("errorMessage", "");
 				// registration successful, notify user on front end
@@ -147,7 +151,8 @@ public class UserController {
 				registeredWithCPP = true;
 
 			}
-			else if(response.getStatusCode().value()== 409){
+			else if(response.getStatusCode().value()== 204){
+				System.out.println(response.getStatusCodeValue());
 				logger.log(Level.INFO, "User already exists "
 						+ response.getStatusCode().value());
 				cppErrorMessage = "User already exists";
@@ -155,9 +160,11 @@ public class UserController {
 				cppSuccessMessage = "";
 				//model.addAttribute("successMessage", "");
 			}
-
+			else {
+				System.out.println(response.getStatusCodeValue());
+			}
 			logger.log(Level.INFO, "CPP registration API call ended...");
-			
+
 		} catch (RestClientException e) {
 			// TODO Auto-generated catch block
 			logger.log(Level.WARNING, e.toString());
@@ -166,7 +173,7 @@ public class UserController {
 		if(registeredWithCPP) {
 			// add user to JAVA application db
 			long userId = userService.createUser(user);
-			
+
 			logger.log(Level.INFO, "Create user called with " + user.toString());
 
 			// if user id is 0, user already registered
@@ -203,7 +210,7 @@ public class UserController {
 			// delete method requires session id(user roles (eg admin role) have not
 			// been implemented, can't be done now
 		}
-		
+
 		if(registeredWithJava && !registeredWithCPP) {
 			globalErrorMessage = cppErrorMessage;
 			globalSuccessMessage = cppSuccessMessage;			
@@ -233,20 +240,115 @@ public class UserController {
 		return viewPage;
 	}
 
-	@RequestMapping(value="/login", method=RequestMethod.POST, produces="application/json")
-	public String validateUser(@RequestParam("emailId") String emailId,@RequestParam("password") String password)
+	@RequestMapping(value="/login", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String validateUser(@RequestBody UserDto requestUserDto)
 	{
+		// Login logic
+		// 1. Login to Java DB to get user's own data and contact data(user's contacts)
+		// 2. Login to CPP DB to get session ID
+		// 3. Send all data in a DTO to Firebase
+		// 4. If all the three tasks above succeed, pass this user's details
+		// and session id to index.jsp, to set it in localStorage
+
+		System.out.println("Got data from form as : ");
+		System.out.println(requestUserDto.toString());
+		
+		boolean javaLoginSuccess = false;
+		boolean cppLoginSuccess = false;
+		boolean firebaseLoginSuccess = false;
+
 		String response;
+		
+		UserDto userDto = null;
 
 		JSONObject jsonObject = new JSONObject();
 
-		String viewPage = "login";
+		String loginMessage = "Incorrect username or password";
+		
+		String sessionId = "";
 
-		if(emailId.equals("root@gmail.com") && password.equals("root123")) {
-			viewPage = "index";
+		String emailId = requestUserDto.getEmailId();
+		String password = requestUserDto.getPassword();
+		
+		logger.log(Level.INFO, emailId + ":" + password);
+		
+		// get user object from java db
+		User user = userService.login(emailId, password);
+
+		if(user != null) {
+			// java login succeeded
+			javaLoginSuccess = true;
 		}
+		
+		if(javaLoginSuccess) {
+			// cpp login attempt
+			// prepare request JSON
+			JSONObject requestJson = new JSONObject();
+			try{	
+				requestJson.put("email", emailId);
+				requestJson.put("password", password);
 
-		return viewPage;
+			}catch(JSONException e){
+				logger.log(Level.INFO,"Could not create register request JSON");
+			}
+
+			HttpHeaders headers = new HttpHeaders();
+
+			// setting http header - content type
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			// creating request entity
+			HttpEntity<String> entity = new HttpEntity<String>(requestJson.toString(),headers);
+
+			// cpp login API url
+			String url = "http://172.31.11.110:8192/gc/userauthservice/login/";
+
+			logger.log(Level.INFO, "Calling CPP Api for login");
+
+			// calling API with POST method to login user
+			ResponseEntity<Object> loginResponse;
+			
+			try {
+				loginResponse = restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+				if(loginResponse.getStatusCode().value()== 200){
+					logger.log(Level.INFO, "User login to CPP DB successful");
+
+					cppLoginSuccess = true;
+					
+					System.out.println(loginResponse.getBody());
+				}
+				else if(loginResponse.getStatusCode().value()== 401){
+					logger.log(Level.INFO, "Incorrect username or password "
+							+ loginResponse.getStatusCode().value());
+					cppLoginSuccess = false;
+				}
+
+				logger.log(Level.INFO, "CPP login API call ended...");
+
+			} catch (RestClientException e) {
+				// TODO Auto-generated catch block
+				logger.log(Level.WARNING, e.toString());
+			}
+			// cpp login code ends
+		}
+		
+		if(javaLoginSuccess && cppLoginSuccess) {
+			userDto = new UserDto();
+			userDto.setEmailId(emailId);
+			userDto.setSessionId(sessionId);
+			userDto.setUserStatus(true);
+			// not returning other fields now
+		}
+		else {
+			userDto = new UserDto();
+			userDto.setUserStatus(false);
+		}
+		
+		Gson gson = new Gson();
+		
+		
+		return gson.toJson(userDto);
 	}
 
 }

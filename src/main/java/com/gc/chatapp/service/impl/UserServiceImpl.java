@@ -1,10 +1,13 @@
 package com.gc.chatapp.service.impl;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gc.chatapp.controller.UserController;
 import com.gc.chatapp.dao.UserDao;
 import com.gc.chatapp.dao.impl.UserDaoImpl;
 import com.gc.chatapp.entities.User;
@@ -12,12 +15,15 @@ import com.gc.chatapp.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService{
+	
+	private static final Logger logger =
+			Logger.getLogger(UserServiceImpl.class.getName());
 
 	@Autowired
 	private UserDao userDao;
 	@Override
 	public long createUser(User user) {
-		System.out.println("Called createUser in Service with data: " + user);
+		logger.log(Level.INFO, "Called createUser in Service with data: " + user);
 		return userDao.createUser(user);
 	}
 
@@ -36,7 +42,8 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public User login(String mailId, String password) {
 		// TODO Auto-generated method stub
-		return null;
+		logger.log(Level.INFO, "Called login in Service with data: " + mailId);
+		return userDao.login(mailId, password);
 	}
 
 	@Override
