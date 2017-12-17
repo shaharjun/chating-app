@@ -29,10 +29,10 @@ function sendChat(email) {
     
     var star = "<i onclick='makeGold()' style='color: burlywood' class='fa fa-star starmsg' aria-hidden='true'></i>"
     var html = "<li class='replies'>" +
-        "<img src='images/profile.png' alt='' />" +
+        "<img src='resources/images/profile.png' alt='' />" +
         "<p style=\"word-wrap: break-word;\">" + sentMessage.chatMessageText + "</p></li>";
     var rcMessage = "<li class='sent'>" +
-        "<img src='images/profile.png' alt='' />" +
+        "<img src='resources/images/profile.png' alt='' />" +
         "<p  onclick='showStar()' style=\"word-wrap: break-word;\">" + receivedMessage.chatMessageText + "</p>" + star + "</li>";
     var isValid = isValidMessage(sentMessage.chatMessageText);
     if (isValid) {
@@ -99,7 +99,7 @@ function searchContactDisplayResult(searchResult, allContactsOfUser) {
             var contactName = value["fullName"];
             var email = value["emailId"];
             //console.log(contactName);
-            allContactsString += '<li class="contact" data-email="' + email + '"><div class="wrap"><span class="contact-status"></span> <img src="images/profile.png" alt="" />' +
+            allContactsString += '<li class="contact" data-email="' + email + '"><div class="wrap"><span class="contact-status"></span> <img src="resources/images/profile.png" alt="" />' +
                 '<div class="meta"><p class="name">' + contactName + '</p></div></div></li>';
         })
         $('#contacts > ul').html(allContactsString);
@@ -319,7 +319,7 @@ $(document).ready(function () {
         
         rq =getRequests();
         var emailId = $(event.currentTarget).data("emailid");
-        var msg = '<li class="sent"><img src="images/profile.png" alt="">' +
+        var msg = '<li class="sent"><img src="resources/images/profile.png" alt="">' +
             '<p>' + rq[emailId].creator + ' wants to connect with you</p>' +
             '&nbsp<i onClick="approveRequest(\'' + emailId + '\')" style="font-size:2em;color:seagreen" class="fa fa-check-circle" aria-hidden="true"></i>' +
             '&nbsp&nbsp<i onClick="declineRequest(\'' + emailId + '\')" style="font-size:2em;color:indianred" class="fa fa-times" aria-hidden="true"></i></li>';
@@ -356,11 +356,11 @@ function displayChatMessages(email) {
             for (var i = 0; i < messagesArray.length; i++) {
                 if (messagesArray[i].creator == thisUser.emailId) {
                     allMessages += "<li class='replies'>" +
-                        "<img src='images/profile.png' alt='' />" +
+                        "<img src='resources/images/profile.png' alt='' />" +
                         "<p style=\"word-wrap: break-word;\">" + messagesArray[i].chatMessageText + "</p></li>";
                 } else if (messagesArray[i].receiver == thisUser.emailId) {
                     allMessages += "<li class='sent'>" +
-                        "<img src='images/profile.png' alt='' />" +
+                        "<img src='resources/images/profile.png' alt='' />" +
                         "<p onclick='showStar()' style=\"word-wrap: break-word;\">" + messagesArray[i].chatMessageText + "</p>" + star + "</li>";
                 }
             }
@@ -391,13 +391,13 @@ function displayAllContacts(allContacts) {
     getRequests().then(function(store) {
     if (store) {
         for (i=0;i<store.length;i++) {
-            allContactsString += '<li data-emailid="' + store[i].emailId + '" class="request" ><div class="wrap"><span class="contact-status"></span> <img src="images/profile.png" alt="" />' +
+            allContactsString += '<li data-emailid="' + store[i].emailId + '" class="request" ><div class="wrap"><span class="contact-status"></span> <img src="resources/images/profile.png" alt="" />' +
                 '<div class="meta"><p class="name">' + store[i].creator + '</p></div></div></li>';
         }
     }
     if (allContacts != null) {
         for (var key in allContacts) {
-            allContactsString += '<li class="contact" data-email="' + key + '"><div class="wrap"><span class="contact-status"></span> <img src="images/profile.png" alt="" />' +
+            allContactsString += '<li class="contact" data-email="' + key + '"><div class="wrap"><span class="contact-status"></span> <img src="resources/images/profile.png" alt="" />' +
                 '<div class="meta"><p class="name">' + allContacts[key].fullName + '</p></div></div></li>';
         }
     }
@@ -501,7 +501,7 @@ function approveRequest(email) {
     }
     var el = $('#contacts > ul > li').eq($(event.currentTarget));
     el.remove();
-    var html = '<li class="contact" data-email="' + email + '"><div class="wrap"><span class="contact-status"></span> <img src="images/profile.png" alt="" />' +
+    var html = '<li class="contact" data-email="' + email + '"><div class="wrap"><span class="contact-status"></span> <img src="resources/images/profile.png" alt="" />' +
         '<div class="meta"><p class="name">' + contact.fullName + '</p></div></div></li>';
     $('#contacts > ul').append(html);
     bringToTop($('#background'));
@@ -558,7 +558,7 @@ function displaySearchUserResult(searchResult) {
         searchResult.forEach(function (value, key, setObj) {
             var userName = value["fullName"];
             var emailId = value["emailId"];
-            resultString += "<div><li ><div class=\"inlineDisplay\"><img  class=\"imageSearchUser\" src = \"images/profile.png\" alt=\"\" /></div>" + "<div class=\"inlineDisplay userDetailsSearchUser\" >";
+            resultString += "<div><li ><div class=\"inlineDisplay\"><img  class=\"imageSearchUser\" src = \"resources/images/profile.png\" alt=\"\" /></div>" + "<div class=\"inlineDisplay userDetailsSearchUser\" >";
             resultString += userName + "<br>" + emailId + "</div><i data-mail=" + emailId + " onclick=\"addContact()\" class=\" addButton material-icons\">add</i></li></div><br>";
         })
     }
@@ -621,7 +621,7 @@ function reminderDisplaySearchUserResult(searchResult) {
         searchResult.forEach(function (value, key, setObj) {
             var userName = value["fullName"];
             var emailId = value["emailId"];
-            resultString += "<div><li ><div class=\"inlineDisplay\"><img  class=\"imageSearchUser\" src = \"images/profile.png\" alt=\"\" /></div>" + "<div class=\"inlineDisplay userDetailsSearchUser\" >";
+            resultString += "<div><li ><div class=\"inlineDisplay\"><img  class=\"imageSearchUser\" src = \"resources/images/profile.png\" alt=\"\" /></div>" + "<div class=\"inlineDisplay userDetailsSearchUser\" >";
             resultString += userName + "<br>" + emailId + "</div><i data-mail=" + emailId + " onclick=\"reminderContactToDisplay()\" class=\" addButton material-icons\">add</i></li></div><br>";
         })
     }

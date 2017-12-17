@@ -36,19 +36,6 @@ var max_fields      = 4; //maximum CONTACTS allowed
 
 
 $(function () {
-
-    var id=0;
-	firebase.database().ref('idGenerator/pollId').once('value').then(function (snapshot) {
-			id=snapshot.val();
-			++id;
-			firebase.database().ref('idGenerator').update({'pollId' : id});
-			console.log(id);
-			
-			
-			});
-	
-	
-	
 	
 	$("#popUp_1").hide();
 	$("#demo").hide();

@@ -3,6 +3,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html class=''>
+<link rel="icon" href="resources/images/favicon/favicon.ico">
 <head>
 <meta charset='UTF-8'>
 <meta name="robots" content="noindex">
@@ -302,7 +303,7 @@
 		<div id="chat" class="content" style="z-index: -10">
 			<div class="contact-profile">
 
-				<img src="images/profile.png" alt="" />
+				<img src="resources/images/profile.png" alt="" />
 				<p></p>
 
 
