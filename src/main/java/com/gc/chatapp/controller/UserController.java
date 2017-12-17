@@ -70,10 +70,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value="/register", method=RequestMethod.POST)	
-	public String registerUser(@RequestParam("emailId") String emailId,
-			@RequestParam("password") String password,
-			@RequestParam("fullName") String fullName,
-			@RequestParam("phoneNo") long phoneNo, Model model)
+	public @ResponseBody String registerUser(@RequestBody UserDto requestUserDto)
 	{
 		// registration logic
 		// 1.register with cpp
@@ -101,6 +98,11 @@ public class UserController {
 
 		String globalErrorMessage = "";
 		String globalSuccessMessage = "";
+		
+		String emailId = requestUserDto.getEmailId();
+		String fullName = requestUserDto.getFullName();
+		String password = requestUserDto.getPassword();
+		long phoneNo = Long.parseLong(requestUserDto.getPhoneNo());
 
 		// create User object from request parameters
 		User user = new User();
@@ -213,6 +215,8 @@ public class UserController {
 			// delete method requires session id(user roles (eg admin role) have not
 			// been implemented, can't be done now
 		}
+		
+		String statusCode = "";
 
 		if(registeredWithJava && !registeredWithCPP) {
 			globalErrorMessage = cppErrorMessage;
@@ -237,10 +241,14 @@ public class UserController {
 			globalSuccessMessage = "";
 			globalErrorMessage = "User already registered";
 		}
-		model.addAttribute("errorMessage", globalErrorMessage);
-		model.addAttribute("successMessage", globalSuccessMessage);		
-
-		return viewPage;
+	
+		UserDto userDto = new UserDto();
+		userDto.setGlobalErrorMessage(globalErrorMessage);
+		userDto.setGlobalSuccessMessage(globalSuccessMessage);
+		
+		Gson gson = new Gson();
+		
+		return gson.toJson(userDto);
 	}
 
 	@RequestMapping(value="/login", method=RequestMethod.POST,

@@ -1,11 +1,9 @@
 function validatePassword() {
-	var isPasswordValid = false;
 	$("#password").on('input', function () {
 		var password = $("#password").val();
 		$("#password").addClass("invalid");
 		if (password.length >= 6) {
 			$("#password").removeClass("invalid");
-			isPasswordValid = true;
 		}
 	});
 }
@@ -24,7 +22,6 @@ String.prototype.hashCode = function () {
 }
 
 function validateRegisterForm(formComplete, fullname, phone, email, password) {
-	var formComplete = true;
 	if (email === "") {
 		Materialize.toast("Enter email", 1000);
 		formComplete = false;
@@ -34,8 +31,8 @@ function validateRegisterForm(formComplete, fullname, phone, email, password) {
 	} else if (phone === "") {
 		Materialize.toast("Enter phone", 1000);
 		formComplete = false;
-	} else if (password === "" || password.length < 6) {
-		Materialize.toast("Enter password(min 6 characters)", 1000);
+	} else if (password === "") {
+		Materialize.toast("Enter password", 1000);
 		formComplete = false;
 	}
 	return formComplete;
@@ -61,7 +58,4 @@ function setLocalStorage(key, value) {
 	}
 }
 
-function showMessage(message){
-	Materialize.toast(message, 4000);
-}
 

@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	var user = null;	
 	// Get data from local storage
-	user = getLocalStorage("thisUser");
+	//user = getLocalStorage("thisUser");
 	// Get data from java server
 
 	$("#login-button").click(function(){
@@ -36,7 +36,8 @@ $(document).ready(function(){
 					// redirect to index
 					if(data.userStatus == true){
 						localStorage.setItem("sessionId", data.sessionId);
-						localStorage.setItem("emailId", data.emailId);
+						//localStorage.setItem("emailId", data.emailId);
+//						allUsers()
 						window.location.replace("index");
 					}
 					if(data.userStatus == false){

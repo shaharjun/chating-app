@@ -14,6 +14,8 @@ public class UserDto {
 	private String emailId;
 	private String profilePictureUrl;
 	private String sessionId;
+	private String globalErrorMessage;
+	private String globalSuccessMessage;
 	// to indicate login status, can be removed later
 	private boolean userStatus = false;
 	
@@ -93,6 +95,23 @@ public class UserDto {
 
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
+	}
+	
+
+	public String getGlobalErrorMessage() {
+		return globalErrorMessage;
+	}
+
+	public void setGlobalErrorMessage(String globalErrorMessage) {
+		this.globalErrorMessage = globalErrorMessage;
+	}
+
+	public String getGlobalSuccessMessage() {
+		return globalSuccessMessage;
+	}
+
+	public void setGlobalSuccessMessage(String globalSuccessMessage) {
+		this.globalSuccessMessage = globalSuccessMessage;
 	}
 
 	@Override

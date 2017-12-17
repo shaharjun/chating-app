@@ -7,18 +7,15 @@
 <meta charset='UTF-8'>
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>	
-<link href="<c:url value="/resources/css/reset.min.css" />" rel="stylesheet"></link>
-<link rel="stylsheet" href='<c:url value="/resources/css/bootstrap.min.css" />'> <!-- CDN for bootstrap.min.css -->
-<link href='' rel='stylesheet' type='text/css'><!-- FONTS from CDN -->
-
-<link href="<c:url value="/resources/css/reset.min.css" />" rel="stylesheet"/>
-<link href="<c:url value="/resources/css/materialize.min.css" />" rel='stylesheet'> <!-- Materialize CDN link -->
-
-<link href="<c:url value="/resources/css/reset.min.css" />" rel="stylesheet"></link>
+<script type="text/javascript"
+	src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<link rel="stylsheet" href='resources/css/bootstrap.min.css'>
+<link href='resources/css/fonts.css' rel='stylesheet' type='text/css'>
+<link href="resources/css/materialize.css" rel='stylesheet'>
+<link rel='stylesheet prefetch' href='resources/css/reset.min.css'>
 <link rel='stylesheet prefetch'
 	href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'>
-<link rel='stylesheet' href='<c:url value="/resources/css/chatStyle.css" />'>
+<link rel='stylesheet' href='resources/css/chatStyle.css'>
 <script type="text/javascript"
 	src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <!--Import Google Icon Font-->
@@ -36,14 +33,38 @@
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"
 	type="text/javascript"></script>
-<script src='../js/plugins/jquery-2.2.4.min.js'></script>
+<script src='resources/js/plugins/jquery-2.2.4.min.js'></script>
 <script type="text/javascript"
 	src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-<script src='../js/populate.js'></script>
-<script src='../js/main.js'></script>
-<script src='../js/poll.js'></script>
-<link rel="stylesheet" href="../css/croppie.css" />
-<script src="../js/croppie.js"></script>
+<script src='resources/js/model.js'></script>
+<script src='resources/js/util.js'></script>
+<script src='resources/js/apiCalls.js'></script>
+<!-- <script src='js/populate.js'></script> -->
+<script src='resources/js/main.js'></script>
+<script src='resources/js/poll.js'></script>
+<!--<script src='js/pollFirebase.js'></script>-->
+<link rel="stylesheet" href="css/croppie.css" />
+<script src="resources/js/croppie.js"></script>
+<!-- firebase scripts -->
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
+<script
+	src="https://www.gstatic.com/firebasejs/4.6.2/firebase-database.js"></script>
+<script
+	src="https://www.gstatic.com/firebasejs/4.6.2/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.8.0/firebase.js"></script>
+<script>
+	// Initialize Firebase
+	var config = {
+		apiKey : "AIzaSyAC7vCACafVTaQZ_uyyxSRmoWNofhX185Q",
+		authDomain : "gconnect-4524f.firebaseapp.com",
+		databaseURL : "https://gconnect-4524f.firebaseio.com",
+		projectId : "gconnect-4524f",
+		storageBucket : "gconnect-4524f.appspot.com",
+		messagingSenderId : "792119929745"
+	};
+	firebase.initializeApp(config);
+</script>
+<script src='resources/js/firebase.js'></script>
 </head>
 <body id="mainBody">
 	<div id="frame">
@@ -57,7 +78,7 @@
 						<ul>
 							<li id="status-online" class="active"><span
 								class="status-circle"></span>
-								<p>Online</p></li>
+								<p>Available</p></li>
 							<li id="status-away"><span class="status-circle"></span>
 								<p>Away</p></li>
 							<li id="status-busy"><span class="status-circle"></span>
@@ -190,7 +211,8 @@
 						<div class="card-action">
 							<input type='file' onchange="readURL(this);"
 								accept="image/jpeg, image/png"
-								style="margin-left: 10%; color: green;" /><br> <br>
+								style="margin-left: 10%; color: green;" /><br>
+							<br>
 						</div>
 						<div id="userName" class="input-field">
 							<p class="cardLabel">Full Name</p>
@@ -323,6 +345,8 @@
 						type="text" id="remainderdate" class="datepicker"> <label
 						for="icon_prefix2">Enter Date</label>
 				</div>
+
+				<!--add contact reminder-->
 				<div class="input-field col s6">
 					<div class="input_fields_wrap">
 						<p>
@@ -347,11 +371,12 @@
 						</div>
 					</div>
 				</div>
+				<!--end of contact reminder -->
 			</div>
 			<div class="modal-footer">
 				<a href="#!" style="background: #32465a; color: white;"
 					class="modal-action modal-close btn-flat" id="addrem"
-					onClick='sendReminderChat()'>Add Reminder</a> <a href="#!"
+					onClick='sendReminderChatValues()'>Add Reminder</a> <a href="#!"
 					style="background: #32465a; color: white;"
 					class="modal-action modal-close btn-flat">Close</a>
 			</div>
@@ -415,13 +440,20 @@
 										<i class="material-icons">add</i>
 									</a>
 								</p>
-								<div>
-									<input type="text" name="mytext" id="addContactPoll1">
+								<div id="contactForPoll"></div>
+								<div id="pollContactCreate">
+									<div id="psearchUserResult">
+										<ul id="psearchUserResultList">
+										</ul>
+									</div>
 								</div>
+								<!--<div><input type="text" name="mytext" id="addContactPoll1"></div>-->
 							</div>
+
 							<br> <input type="button" id="sendPoll"
 								value="Send the Poll" class="waves-effect waves-light btn">
 						</form>
+
 					</div>
 				</div>
 				<!-- </div> -->
@@ -434,8 +466,7 @@
 				</div>
 			</div>
 		</div>
-
-	</div>
-	<script src='../js/datepicker.js'></script>
+		<script src='resources/js/datepicker.js'></script>
 </body>
 </html>
+

@@ -5,19 +5,19 @@ var User = function () {
   this.phoneNo = 0;
   this.emailId = "";
   this.profilePictureUrl = profilePictureUrl;
-  this.chatContacts = [];
+  this.chatContacts = new Map();
 }
 
-var Message = function(){
+var IndividualChatMessage = function(){
   this.creator = "";
   this.receiver = "";
   this.chatMessageId = 0;
   this.createdOn = new Date();
   this.starred = false;
   this.chatMessageText = "";
-  this.messageType = 0;
   this.chatStatus = "";
   this.chatType = "";
+  this.ack = 0;
 }
 
 var ReminderMessage = function(){
@@ -27,9 +27,9 @@ var ReminderMessage = function(){
   this.createdOn = new Date();
   this.starred = false;
   this.chatMessageText = "";
-  this.messageType = 0;
   this.chatStatus = "";
-  this.chatType = "";
+  this.chatType = "REMINDER";
+  this.ack = 0;
   this.scheduledDate = "";
 }
 
