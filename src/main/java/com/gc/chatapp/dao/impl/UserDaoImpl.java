@@ -30,11 +30,9 @@ public class UserDaoImpl implements UserDao{
 		long statusCode = 0;
 		
 		if(user.getEmailId().equals(user.getEmailId())) {
-			statusCode = 0;
-		}
-		else {
 			statusCode = 1;
 		}
+		
 		System.out.println("Status code is " + statusCode);
 		return statusCode;
 		// polluted code ends
@@ -58,7 +56,7 @@ public class UserDaoImpl implements UserDao{
 		// polluted code
 		boolean areCredentialsCorrect = false;
 		User user = null;
-		if(mailId.equals("utkarshagaumat1@gmail.com")) {
+		if(mailId.equals(mailId)) {
 			areCredentialsCorrect = true;
 		}
 		if(areCredentialsCorrect) {

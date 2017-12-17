@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -114,9 +116,8 @@ public class UserController {
 		try{	
 			requestJson.put("name", fullName);
 			requestJson.put("email", emailId);
-			requestJson.put("mobileNumber", phoneNo);
+			requestJson.put("mobileNumber", Long.toString(phoneNo));
 			requestJson.put("password", password);
-
 		}catch(JSONException e){
 			logger.log(Level.INFO,"Could not create register request JSON");
 		}
@@ -140,7 +141,7 @@ public class UserController {
 		try {
 			response = restTemplate.exchange(url, HttpMethod.PUT, entity, Object.class);
 			if(response.getStatusCode().value()== 200){
-				
+
 				cppErrorMessage = "";
 				//model.addAttribute("errorMessage", "");
 				// registration successful, notify user on front end
@@ -151,22 +152,24 @@ public class UserController {
 				registeredWithCPP = true;
 
 			}
-			else if(response.getStatusCode().value()== 204){
-				System.out.println(response.getStatusCodeValue());
-				logger.log(Level.INFO, "User already exists "
-						+ response.getStatusCode().value());
-				cppErrorMessage = "User already exists";
-				//model.addAttribute("errorMessage", "User already exists");
-				cppSuccessMessage = "";
-				//model.addAttribute("successMessage", "");
-			}
 			else {
-				System.out.println(response.getStatusCodeValue());
+				logger.log(Level.INFO, "Malformed Request(204)");
 			}
 			logger.log(Level.INFO, "CPP registration API call ended...");
 
-		} catch (RestClientException e) {
-			// TODO Auto-generated catch block
+		} catch (HttpClientErrorException e) {
+
+			HttpStatus status = e.getStatusCode();
+			if (status != HttpStatus.NO_CONTENT) {
+				logger.log(Level.INFO, "User already exists ");
+			}
+			
+			cppErrorMessage = "User already exists";
+			//model.addAttribute("errorMessage", "User already exists");
+			cppSuccessMessage = "";
+			//model.addAttribute("successMessage", "");
+
+
 			logger.log(Level.WARNING, e.toString());
 		}
 
@@ -221,7 +224,7 @@ public class UserController {
 		}
 		else if(!registeredWithJava && !registeredWithCPP) {
 			// can be changed to an application level error later
-			globalErrorMessage = javaErrorMessage + ", " + cppErrorMessage;
+			globalErrorMessage = cppErrorMessage + " " + javaErrorMessage; 
 			// we check for blank at front end
 			globalSuccessMessage = javaSuccessMessage + cppSuccessMessage;
 		}
@@ -242,7 +245,7 @@ public class UserController {
 
 	@RequestMapping(value="/login", method=RequestMethod.POST,
 			produces="application/json", consumes="application/json")
-	public @ResponseBody String validateUser(@RequestBody UserDto requestUserDto)
+	public @ResponseBody String login(@RequestBody UserDto requestUserDto)
 	{
 		// Login logic
 		// 1. Login to Java DB to get user's own data and contact data(user's contacts)
@@ -251,28 +254,25 @@ public class UserController {
 		// 4. If all the three tasks above succeed, pass this user's details
 		// and session id to index.jsp, to set it in localStorage
 
-		System.out.println("Got data from form as : ");
-		System.out.println(requestUserDto.toString());
-		
 		boolean javaLoginSuccess = false;
 		boolean cppLoginSuccess = false;
 		boolean firebaseLoginSuccess = false;
 
 		String response;
-		
+
 		UserDto userDto = null;
 
 		JSONObject jsonObject = new JSONObject();
 
 		String loginMessage = "Incorrect username or password";
-		
+
 		String sessionId = "";
 
 		String emailId = requestUserDto.getEmailId();
 		String password = requestUserDto.getPassword();
-		
+
 		logger.log(Level.INFO, emailId + ":" + password);
-		
+
 		// get user object from java db
 		User user = userService.login(emailId, password);
 
@@ -280,7 +280,7 @@ public class UserController {
 			// java login succeeded
 			javaLoginSuccess = true;
 		}
-		
+
 		if(javaLoginSuccess) {
 			// cpp login attempt
 			// prepare request JSON
@@ -308,15 +308,23 @@ public class UserController {
 
 			// calling API with POST method to login user
 			ResponseEntity<Object> loginResponse;
-			
+
 			try {
 				loginResponse = restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
 				if(loginResponse.getStatusCode().value()== 200){
 					logger.log(Level.INFO, "User login to CPP DB successful");
-
-					cppLoginSuccess = true;
 					
-					System.out.println(loginResponse.getBody());
+					Gson gson = new Gson();
+					
+					String loginResponseJson = loginResponse.getBody().toString();
+					userDto = gson.fromJson(loginResponseJson, UserDto.class);
+					sessionId = userDto.getSessionId();
+					
+					logger.log(Level.INFO, "UserDTO after cpp login : " + userDto);
+					logger.log(Level.INFO, "Session Id after cpp login : " + userDto.getSessionId());
+					
+					cppLoginSuccess = true;
+
 				}
 				else if(loginResponse.getStatusCode().value()== 401){
 					logger.log(Level.INFO, "Incorrect username or password "
@@ -332,7 +340,7 @@ public class UserController {
 			}
 			// cpp login code ends
 		}
-		
+
 		if(javaLoginSuccess && cppLoginSuccess) {
 			userDto = new UserDto();
 			userDto.setEmailId(emailId);
@@ -344,10 +352,9 @@ public class UserController {
 			userDto = new UserDto();
 			userDto.setUserStatus(false);
 		}
-		
+
 		Gson gson = new Gson();
-		
-		
+
 		return gson.toJson(userDto);
 	}
 
