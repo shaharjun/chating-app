@@ -12,6 +12,16 @@ function isValidMessage(message) {
     return isValid;
 }
 
+function logout(){
+	var id = getLocalStorage("thisUser").userId;
+	console.log(id);
+	firebase.database().ref('loggedInUser/' + id).remove().then(function() {
+        // Code after remove
+    	localStorage.removeItem("thisUser");
+    	window.location.href = "login.html";
+    });
+}
+
 function sendChat(email) {
     var thisUser = null;
 
@@ -44,11 +54,6 @@ function sendChat(email) {
     $('#chatBox').val(' ');
     //scroll to bottom
     scrollToBottom("messages");
-}
-
-function logout() {
-    window.location.href = "login.html";
-    localStorage.removeItem("sessionId");
 }
 
 function random() {
@@ -181,8 +186,11 @@ $(document).ready(function () {
         $("#contacts").toggleClass("expanded");
     });
     $('#logout-button').click(function () {
-        localStorage.removeItem("sessionId");
-        window.location.href = "login.html";
+        firebase.database().ref('loggedInUsers' + user.userId).remove().then(function() {
+            // Code after remove
+        	localStorage.removeItem("thisUser");
+        	window.location.href = "login.html";
+        });
     });
     $("#profile-img").click(function () {
         $("#status-options").addClass("active");
