@@ -161,7 +161,8 @@ $(document).ready(function () {
         var str = $("#cprof #userEmailValue").text();
         sendChat(str);
     });
-    if ("sessionId" in localStorage) {
+    var userData = getLocalStorage("thisUser");
+    if ("sessionId" in userData) {
         console.log("Access Allowed");
     } else {
         console.log("Access Denied, redirecting to Login");
@@ -209,7 +210,7 @@ $(document).ready(function () {
         } else {
             $("#profile-img").removeClass();
         };
-        updateStatus(myStatus, user);
+        updateStatus(myStatus);
         $("#status-options").removeClass("active");
     });
     $('.modal').modal();

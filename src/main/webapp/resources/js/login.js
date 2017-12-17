@@ -35,10 +35,19 @@ $(document).ready(function(){
 
 					// redirect to index
 					if(data.userStatus == true){
-						localStorage.setItem("sessionId", data.sessionId);
+						//localStorage.setItem("sessionId", data.sessionId);
 						//localStorage.setItem("emailId", data.emailId);
-//						allUsers()
-						window.location.replace("index");
+						getAllUsers().then(function(users){
+							var userObject = getUser(users,email);
+							if(userObject != null) {
+								userObject.sessionId = data.sessionId;
+								setLocalStorage("thisUser",userObject);
+								userObject.sessionId = ' ';
+								storeLoggedInUser(userObject);
+								console.log(userObject);
+								window.location.replace("index");
+							}
+						})
 					}
 					if(data.userStatus == false){
 						Materialize.toast("Incorrect email or password", 3000);

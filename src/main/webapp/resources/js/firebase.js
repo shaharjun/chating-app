@@ -1,40 +1,22 @@
-var user = {
-    'fullName': '',
-    'emailId': '',
-    'userId': 0,
-    'password': '',
-    'phoneNo': 0,
-    'profilePictureUrl': '',
-    'chatContacts': []
-};
+//var user = {
+//    'fullName': '',
+//    'emailId': '',
+//    'userId': 0,
+//    'password': '',
+//    'phoneNo': 0,
+//    'profilePictureUrl': '',
+//    'chatContacts': []
+//};
 // ab honga dangal
 user = JSON.parse(localStorage.getItem("thisUser"));
-var sessionId = JSON.parse(localStorage.getItem("sessionId"));
-var allContacts = localStorage.getItem("chatContacts");
+var contactArray = [];
+function init() {
+user = JSON.parse(localStorage.getItem("thisUser"));
+//var sessionId = JSON.parse(localStorage.getItem("sessionId"));
 var myStatus = "available";
 //console.log(user);
-var contactArray = [];
-//hard-coded
-if (user.userId == 2) {
-    contactArray[1] = {
-        'fullName': "rachna saluja",
-        'emailId': "rachnasaluja@gmail.com",
-        'userId': 1,
-        'phoneNo': "9292929292",
-        'profilePictureUrl': "",
-        'contactUserStatus': ""
-    };
-}
-else if (user.userId == 1) {
-    contactArray[2] = {
-        'fullName': "riya tilwani",
-        'emailId': "riyatilwani@gmail.com",
-        'userId': 2,
-        'phoneNo': "9292929292",
-        'profilePictureUrl': "",
-        'contactUserStatus': ""
-    };
-}
+var allContacts = user.chatContacts;
+
 if (allContacts != null) {
     var allContactsList = [];
     allContactsList = JSON.parse(allContacts);
@@ -49,19 +31,20 @@ if (allContacts != null) {
         };
     }
 }
+}
 function storeLoggedInUser(user) {
+	init();
     var myStatus = "available";
     var contactStatus;
     firebase.database().ref().child('loggedInUser').child(user.userId).set({
         'emailId': user.emailId,
         'phoneNo': user.phoneNo,
         'profilePictureUrl': user.profilePictureUrl,
-        'sessionId': sessionId,
         'fullName': user.fullName,
         'userStatus': myStatus,
         'chatContacts': contactArray
     });
-    firebase.database().ref('loggedInUser/').once('value', function (snapshot) {
+    firebase.database().ref('loggedInUser/').once('value').then(function (snapshot) {
         for (var contact in contactArray) {
             if (snapshot.child(contact).exists()) {
                 firebase.database().ref('loggedInUser/' + contactArray[contact].userId + '/chatContacts/' + user.userId)
@@ -73,7 +56,8 @@ function storeLoggedInUser(user) {
         }
     });
 }
-function updateStatus(myStatus, user) {
+function updateStatus(myStatus) {
+	init();
     firebase.database().ref('loggedInUser/' + user.userId).update({ 'userStatus': myStatus });
     firebase.database().ref('loggedInUser/').once('value', function (snapshot) {
         for (var contact in contactArray) {

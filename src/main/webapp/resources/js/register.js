@@ -22,7 +22,7 @@ $(document).ready(function () {
 //			} else {
 			var requestData = {
 					"emailId": email,
-					"password": password.hashCode(),
+					"password": password,
 					"phoneNo": phone,
 					"fullName": fullname
 			};

@@ -43,7 +43,7 @@
 <script src='resources/js/main.js'></script>
 <script src='resources/js/poll.js'></script>
 <!--<script src='js/pollFirebase.js'></script>-->
-<link rel="stylesheet" href="css/croppie.css" />
+<link rel="stylesheet" href="resources/css/croppie.css" />
 <script src="resources/js/croppie.js"></script>
 <!-- firebase scripts -->
 <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
@@ -249,7 +249,7 @@
 
 					<!-- Card Profile image -->
 					<div class="card-image">
-						<img src="images/profile.png" class="display-pic">
+						<img src="resources/images/profile.png" class="display-pic">
 					</div>
 
 					<!-- Card Profile content -->

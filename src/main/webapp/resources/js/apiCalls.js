@@ -181,7 +181,7 @@ function storeRequest(request) {
     var senderObject;
     var receiverObject;
     var receiverStatus = 'offline';
-    getLoggedInUsers().then(function(data) {
+    getAllUsers().then(function(data) {
         console.log("in store request");
         console.log(data);
         receiverObject = getUser(data,request.receiver)
