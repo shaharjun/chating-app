@@ -106,7 +106,7 @@
 				</div>
 				<div class="row">
 					<p style="text-align: center;" class="margin medium-small">
-						<a href="register.html">Register Now!</a>
+						<a href="register">Register Now!</a>
 					</p>
 				</div>
 

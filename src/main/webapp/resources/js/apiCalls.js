@@ -1,3 +1,13 @@
+sampleMessage = {
+    'creator' : 'd@gmail.com',
+    'receiver' : 'chandra@gmail.com',
+    'chatMessageId' : 0,
+    'createdOn' : ' ',
+    'chatMessageText' : 'yolo',
+    'chatStatus' : ' ',
+    'chatType' : ' ',
+    'ack' : 0
+  }
 function getCurrentUserEmail() {
     var user =null;
     user = getLocalStorage("thisUser");
@@ -31,38 +41,34 @@ function addUserToUserList(user){
 function storeChat(message) {
     
     var thisUser = getLocalStorage("thisUser");
-    var key = null;
-    if(thisUser.emailId == message.creator)
-        key = message.receiver;
-    else
-        key = message.creator;
-    var messages = null;
-    
-    messages = getLocalStorage("messages");
-    if (messages == null) {
-        messages = new Map();
-        var arr = new Map();
-        var arr1 = [];
-        arr1.push(message);
-        arr[key] = arr1;
-        messages[thisUser.emailId] = arr;
-        setLocalStorage("messages",messages);
-    } else {
-        if (!messages[thisUser.emailId][key]) {
-            var arr = [];
-            arr.push(message);
-            messages[thisUser.emailId][key] = arr;
-        } else {
-            var arr = messages[thisUser.emailId][key];
-            arr.push(message);
-            messages[thisUser.emailId][key] = arr;
-        }
-        setLocalStorage("messages",messages);
-    }
+    firebase.database().ref('idGenerator/messageId').once('value').then(function(snapshot){
+        message.messageId = snapshot.val();
+        var id = message.messageId+1; 
+        firebase.database().ref('idGenerator').update({'messageId':id}).then(function(){
+           // thisUser.userId = 22;
+            getAllUsers().then(function(data) {
+            contact = getUser(data,message.receiver);
+        //if(contact!=null) {
+            firebase.database().ref('chatMessages/'+thisUser.userId+'/'+contact.userId+'/'+message.messageId).set(message);
+            firebase.database().ref('chatMessages/'+contact.userId+'/'+thisUser.userId+'/'+message.messageId).set(message);
+      //  }}
+            });
+   // });
+});});
 }
 
-function getChatMessages() {
-    return getLocalStorage("messages");
+function getChatMessages(email) {
+    var thisUser = getLocalStorage("thisUser");
+    var msgs = null;
+    return getAllUsers().then(function(data){
+        contact = getUser(data,email);
+        return firebase.database().ref('chatMessages/'+thisUser.userId+'/'+contact.userId)
+        .once('value').then(function(snapshot){
+            msgs =  snapshot.val();
+            console.log(msgs);
+            return msgs;
+        })
+    })
 }
 
 function storeStarMsg(starredMessage) {
@@ -101,9 +107,9 @@ function getStarredMessages() {
     return starmsgs;
 }
 
-function getRequests() {
+function getRequests(userId) {
     
-    return firebase.database().ref('contactRequests/').once('value').then(function(snapshot) {
+    return firebase.database().ref('contactRequests/'+userId).once('value').then(function(snapshot) {
         console.log(snapshot.val());
         return snapshot.val();
     });
@@ -111,34 +117,59 @@ function getRequests() {
 }
 
 function removeRequest(email) {
-    var rqs = null
-    rqs = getLocalStorage("requests");
-    delete rqs[email];
-    setLocalStorage("requests",rqs);
+    var users = null;
+    var id = getLocalStorage("thisUser").userId;
+    var idToRemove;
+    firebase.database().ref('contactRequests/'+id).once('value').then(function(snapshot) {
+        var snapshotVal = snapshot.val();
+        for(key in snapshotVal) {
+            if(snapshotVal[key].sender == email)
+            {
+                idToRemove = key;
+            }
+        }
+        firebase.database().ref('contactRequests/'+id+ '/'+idToRemove).remove();
+        var el = $('#contacts > ul > li').eq($(event.currentTarget));
+         el.remove();
+         bringToTop($('#background'));
+         location.reload();
+    })
 }
 
 function getChatContacts() {
-    var users = null;
-
-    users = getAllUsers();
-    console.log(getCurrentUserEmail());
-    var currUser = users[getCurrentUserEmail()];
-    return currUser.chatContacts;
+    var thisUser = getLocalStorage("thisUser");
+    var id = thisUser.userId;
+    return firebase.database().ref('allUsers/'+id+'/chatContacts').once('value').then(function(snapshot){
+       console.log(snapshot.val());
+        return snapshot.val();
+    })
 }
-function addChatContact(contactList) { 
+function addChatContact(email) { 
     var users = null;
-    
-    users = getAllUsers();
-    var currUser = users[getCurrentUserEmail()];
-    currUser.chatContacts = new Map();
-    currUser.chatContacts = contactList;
-    console.log(currUser.chatContacts);
-    console.log(currUser);
-    users[getCurrentUserEmail()] = currUser;
-    console.log(users[getCurrentUserEmail()]);
-    console.log(users);
-    setLocalStorage("thisUser",currUser);
-    setLocalStorage("allUsers",users);
+    var id = getLocalStorage("thisUser").userId;
+    var idToRemove;
+    var userToAdd = {
+        'userId': 0,
+        'fullName' : '',
+        'emailId' : ' '
+    };
+    var currUser = getLocalStorage("thisUser");
+    return firebase.database().ref('contactRequests/'+id).once('value').then(function(snapshot) {
+        var snapshotVal = snapshot.val();
+        for(key in snapshotVal) {
+            if(snapshotVal[key].sender == email)
+            {
+                idToRemove = key;
+                userToAdd.emailId = snapshotVal[key].sender;
+                userToAdd.fullName = snapshotVal[key].senderName;
+                userToAdd.profilePictureUrl = snapshotVal[key].profilePictureUrlOfSender;
+            }
+        }
+        firebase.database().ref('contactRequests/'+id+ '/'+idToRemove).remove();
+        firebase.database().ref('allUsers/'+id+'/chatContacts/'+idToRemove).set(userToAdd);
+        firebase.database().ref('allUsers/'+idToRemove+'/chatContacts/'+id).set(currUser);
+        return userToAdd;
+    })
 }
 // function getAllUsers() {
 //     var users = null;
@@ -147,11 +178,9 @@ function addChatContact(contactList) {
 // }
 function getAllContacts() {
     var thisUser = getLocalStorage("thisUser");
-    var allContacts = thisUser.chatContacts;
-    if (allContacts != null) {
-        return allContacts;
-    }
-    return null;
+    firebase.database().ref('allUsers/'+thisUser.userId+'/chatContacts').once('value').then(function(snapshot){
+        return snapshot.val();
+    })
 }
 function getAllUsers() {
     //var def = $.Deferred();
@@ -168,10 +197,10 @@ function getLoggedInUsers() {
     });
 }
 function getUser(users,emailId) {
-    for(i=0;i<users.length;i++) {
-        if((users[i].emailId).indexOf(emailId) != -1) {
-            console.log(users[i]);
-            return users[i];
+    for(var key in users) {
+        if((users[key].emailId).indexOf(emailId) != -1) {
+            console.log(users[key]);
+            return users[key];
         }
     }
     return null;
@@ -181,7 +210,7 @@ function storeRequest(request) {
     var senderObject;
     var receiverObject;
     var receiverStatus = 'offline';
-    getAllUsers().then(function(data) {
+    getLoggedInUsers().then(function(data) {
         console.log("in store request");
         console.log(data);
         receiverObject = getUser(data,request.receiver)
@@ -191,7 +220,7 @@ function storeRequest(request) {
         var picUrl = getLocalStorage("thisUser").profilePictureUrl;
         var creatorId = getLocalStorage("thisUser").userId;
         var name = getLocalStorage("thisUser").fullName;
-        firebase.database().ref().child('contactRequests').child(request.ack).child(creatorId).set({
+        return firebase.database().ref().child('contactRequests').child(request.ack).child(creatorId).set({
             'sender' : request.creator,
             'senderName' : name,
             'requestStatus' : 'pending',
@@ -202,4 +231,12 @@ function storeRequest(request) {
         return true;
     })
     return false;
+}
+function approveRequestHelper(){
+    //add sender in receiver's contact list and add receiver in sender's contact list
+    //also, remove request from contactRequest table
+
+}
+function declineRequest(){
+    //remove request from contactRequest table and add them to declineRequest table
 }

@@ -44,7 +44,7 @@ $(document).ready(function(){
 								setLocalStorage("thisUser",userObject);
 								userObject.sessionId = ' ';
 								storeLoggedInUser(userObject);
-								console.log(userObject);
+								console.log(userObject.sessionId);
 								window.location.replace("index");
 							}
 						})
