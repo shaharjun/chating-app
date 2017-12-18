@@ -507,7 +507,7 @@ function approveRequest(email) {
         '<div class="meta"><p class="name">' + contact.fullName + '</p></div></div></li>';
     $('#contacts > ul').append(html);
     bringToTop($('#background'));
-    var $toastContent = $('<span>' + name + ' has been added ' + '</span>').add($('<button  onClick="location.reload()" class="btn-flat toast-action">Ok</button>'));
+    var $toastContent = $('<span>' + contact.fullName + ' has been added ' + '</span>').add($('<button  onClick="location.reload()" class="btn-flat toast-action">Ok</button>'));
     Materialize.toast($toastContent, 10000);
    
 });
