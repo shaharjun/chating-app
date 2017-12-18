@@ -16,5 +16,14 @@ public class MessageDto {
 	private int messageType = 0;
 	private ChatStatus chatStatus;
 	private ChatType chatType;
+	private boolean messageSent = false;
+	
+	public boolean isMessageSent() {
+		return messageSent;
+	}
+	public void setMessageSent(boolean messageSent) {
+		this.messageSent = messageSent;
+	}
+	
 	
 }

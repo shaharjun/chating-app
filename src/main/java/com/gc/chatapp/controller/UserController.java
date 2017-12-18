@@ -25,8 +25,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.gc.chatapp.controller.dto.MessageDto;
 import com.gc.chatapp.controller.dto.UserDto;
+import com.gc.chatapp.entities.ChatMessage;
 import com.gc.chatapp.entities.User;
+import com.gc.chatapp.service.ChatService;
 import com.gc.chatapp.service.UserService;
 import com.gc.chatapp.util.Emailer;
 import com.google.gson.Gson;
@@ -40,7 +43,7 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-
+	
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -98,7 +101,7 @@ public class UserController {
 
 		String globalErrorMessage = "";
 		String globalSuccessMessage = "";
-		
+
 		String emailId = requestUserDto.getEmailId();
 		String fullName = requestUserDto.getFullName();
 		String password = requestUserDto.getPassword();
@@ -165,7 +168,7 @@ public class UserController {
 			if (status != HttpStatus.NO_CONTENT) {
 				logger.log(Level.INFO, "User already exists ");
 			}
-			
+
 			cppErrorMessage = "User already exists";
 			//model.addAttribute("errorMessage", "User already exists");
 			cppSuccessMessage = "";
@@ -215,7 +218,7 @@ public class UserController {
 			// delete method requires session id(user roles (eg admin role) have not
 			// been implemented, can't be done now
 		}
-		
+
 		String statusCode = "";
 
 		if(registeredWithJava && !registeredWithCPP) {
@@ -241,13 +244,13 @@ public class UserController {
 			globalSuccessMessage = "";
 			globalErrorMessage = "User already registered";
 		}
-	
+
 		UserDto userDto = new UserDto();
 		userDto.setGlobalErrorMessage(globalErrorMessage);
 		userDto.setGlobalSuccessMessage(globalSuccessMessage);
-		
+
 		Gson gson = new Gson();
-		
+
 		return gson.toJson(userDto);
 	}
 
@@ -321,16 +324,16 @@ public class UserController {
 				loginResponse = restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
 				if(loginResponse.getStatusCode().value()== 200){
 					logger.log(Level.INFO, "User login to CPP DB successful");
-					
+
 					Gson gson = new Gson();
-					
+
 					String loginResponseJson = loginResponse.getBody().toString();
 					userDto = gson.fromJson(loginResponseJson, UserDto.class);
 					sessionId = userDto.getSessionId();
-					
+
 					logger.log(Level.INFO, "UserDTO after cpp login : " + userDto);
 					logger.log(Level.INFO, "Session Id after cpp login : " + userDto.getSessionId());
-					
+
 					cppLoginSuccess = true;
 
 				}
@@ -366,4 +369,45 @@ public class UserController {
 		return gson.toJson(userDto);
 	}
 
+	@RequestMapping(value="/updateProfile", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String updateProfile(@RequestBody UserDto requestUserDto)
+	{
+
+		String response;
+
+		UserDto userDto = new UserDto();;
+
+		JSONObject jsonObject = new JSONObject();
+
+		String emailId = requestUserDto.getEmailId();
+		String phoneNo = requestUserDto.getPhoneNo();
+		String profilePictureUrl = requestUserDto.getProfilePictureUrl();
+		String fullName = requestUserDto.getFullName();
+
+		logger.log(Level.INFO, emailId + ":" + phoneNo + ":" + profilePictureUrl 
+				+ fullName);
+
+		User user = new User();
+		user.setEmailId(emailId);
+		user.setFullName(fullName);
+		user.setPhoneNo(Long.parseLong(phoneNo));
+		user.setProfilePictureURL(profilePictureUrl);
+
+		// get user object from java db
+		boolean updateProfileSuccess = userService.updateProfile(user);
+
+		if(updateProfileSuccess) {			
+			userDto.setUserStatus(true);
+		}
+		else {
+			userDto.setUserStatus(false);
+		}
+
+		Gson gson = new Gson();
+
+		return gson.toJson(userDto);
+	}
+	
+	
 }

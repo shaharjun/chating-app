@@ -246,17 +246,18 @@ $(document).ready(function () {
     });
     $("#updateProfileBtn").click(function () {
         $('#upload-demo').croppie('result', 'base64').then(function (base64) {
-            var user = JSON.parse(localStorage.getItem('thisUser'));
+//            var user = JSON.parse(localStorage.getItem('thisUser'));
             var eUserName = $("#eprof #userNameValue").val();
             var eUserEmail = $("#eprof #userEmailValue").val();
             var eUserPhone = $("#eprof #phone").val();
             user.profilePictureUrl = base64;
-            user.fullName = eUserName;
-            user.emailId = eUserEmail;
-            user.phoneNo = eUserPhone;
-            localStorage.setItem("thisUser", JSON.stringify(user));
-            Materialize.toast("Profile Updated. Refreshing Page.", 4000);
-            location.reload();
+            
+            updateUser(eUserName, eUserEmail, eUserPhone, base64);
+//            
+//            user.fullName = eUserName;
+//            user.emailId = eUserEmail;
+//            user.phoneNo = eUserPhone;
+//            localStorage.setItem("thisUser", JSON.stringify(user));
         });
     });
     $(document).bind("mouseup touchend", function (e) {
@@ -284,27 +285,6 @@ $(document).ready(function () {
     $("#searchUserButton").click(function(){
         searchUser(true);
     })
-    // $.getJSON('./contacts.json', function (data) {}).done(function (data) {
-    //         $.each(data, function (i, contact) {
-    //             // $('ul').append('<li>' + contact.name +'</li>');
-    //             contacts[contact["emailId"]] = contact;
-    //             //console.log(contacts);
-    //         });
-    //         localStorage.setItem("allUsers", JSON.stringify(contacts));
-    //         areContactsLoaded(true);
-    //         $("#searchUserButton").prop("disabled", false);
-    //         $("#searchUserButton").click(function () {
-    //             searchUser(true);
-    //         });
-    //     })
-    //     .error(function () {
-    //         console.log("Data could not be loaded");
-    //         areContactsLoaded(true);
-    //         $("#searchUserButton").prop("disabled", false);
-    //         $("#searchUserButton").click(function () {
-    //             searchUser(true);
-    //         })
-    //     });
     $('#chatBox').keypress(function (event) {
         if (event.keyCode == 13) {
             var str = $("#cprof #userEmailValue").text();

@@ -101,6 +101,12 @@ public class ChatMessage {
 	public void setCreator(User creator) {
 		this.creator = creator;
 	}
+
+	@Override
+	public String toString() {
+		return "ChatMessage [chatMessageId=" + chatMessageId + ", chatMessageText=" + chatMessageText + ", createdOn="
+				+ createdOn + ", chatStatus=" + chatStatus + ", chatType=" + chatType + ", starred=" + starred
+				+ ", creator=" + creator + "]";
+	}
 	
-		
 }
