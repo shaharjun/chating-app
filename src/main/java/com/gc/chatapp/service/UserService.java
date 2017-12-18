@@ -8,15 +8,15 @@ public interface UserService {
 
 	// Register user
 	// Arjun
-	long createUser(User user);
+	User createUser(User user);
 
 	// Search user
 	// Arjun
-	List<User> getUserByEmail(String emailId);
+	User getUserByEmail(String emailId);
 
 	// Search user
 	// Rachna
-	List<User> getUserByName(String name);
+	List<User> getUsersByName(String name);
 
 	// Login User
 	// Arjun
@@ -26,12 +26,13 @@ public interface UserService {
 	// Rohan
 	boolean updateProfile(User user);
 
-	// User can update profile picture
-	// Rohan
-	boolean updateProfilePicture(String base64);
-
 	// user can change password
 	// Rohan
 	boolean changePassword(User user);
 
+	public List<User> getAllUsers();
+
+	// Add new user to user contacts
+	// Rachna
+	boolean addUserToUserContacts(User userToBeAdded, User currentUser);
 }

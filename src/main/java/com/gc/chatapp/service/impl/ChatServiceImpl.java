@@ -2,12 +2,12 @@ package com.gc.chatapp.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gc.chatapp.entities.ChatGroup;
+import com.gc.chatapp.dao.ChatDao;
 import com.gc.chatapp.entities.ChatMessage;
 import com.gc.chatapp.entities.ChatReminder;
-import com.gc.chatapp.entities.GroupChatMessage;
 import com.gc.chatapp.entities.PolledChatMessage;
 import com.gc.chatapp.entities.PolledResponse;
 import com.gc.chatapp.entities.User;
@@ -15,55 +15,9 @@ import com.gc.chatapp.service.ChatService;
 
 @Service
 public class ChatServiceImpl implements ChatService{
-
-	@Override
-	public ChatGroup createChatGroup(ChatGroup chatGroup, User creator) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean addUserToChatGroup(User user, ChatGroup chatGroup) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addGroupAdminToChatGroup(User groupAdmin, ChatGroup chatGroup, User user) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeGroupMemberFromChatGroup(User groupAdmin, ChatGroup chatGroup, User user) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public List<ChatGroup> getAllChatGroupsOfAUser(User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean sendGroupChatMessage(ChatGroup chatGroup, GroupChatMessage groupChatMessage) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public List<ChatMessage> getGroupChatMessages(User user, ChatGroup chatGroup) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean exitChatGroup(ChatGroup chatGroup, User user) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+	@Autowired
+	private ChatDao chatDao;
+	
 	@Override
 	public boolean addPolledChatMessage(PolledChatMessage polledChatMessage) {
 		// TODO Auto-generated method stub
@@ -83,13 +37,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public boolean deleteChatGroup(ChatGroup chatGroup) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public List<ChatMessage> getAllChatMessages(long userId, boolean isStarred) {
+	public List<ChatMessage> getAllStarredChatMessages(long userId, boolean isStarred) {
 		// TODO Auto-generated method stub
 		return null;
 	}

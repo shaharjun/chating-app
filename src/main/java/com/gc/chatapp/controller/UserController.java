@@ -1,11 +1,15 @@
 package com.gc.chatapp.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,6 +36,7 @@ import com.gc.chatapp.entities.User;
 import com.gc.chatapp.service.ChatService;
 import com.gc.chatapp.service.UserService;
 import com.gc.chatapp.util.Emailer;
+import com.gc.chatapp.util.ProfilePicture;
 import com.google.gson.Gson;
 
 @Controller
@@ -43,7 +48,7 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -84,6 +89,7 @@ public class UserController {
 		// 5.if register with both successful, registration successful, 
 		// show success message
 
+		User returnedUser = null;
 
 		// default view page for registration
 		String viewPage="register";
@@ -180,12 +186,12 @@ public class UserController {
 
 		if(registeredWithCPP) {
 			// add user to JAVA application db
-			long userId = userService.createUser(user);
+			returnedUser = userService.createUser(user);
 
 			logger.log(Level.INFO, "Create user called with " + user.toString());
 
 			// if user id is 0, user already registered
-			if(userId == 0L) {
+			if(returnedUser == null) {
 				javaErrorMessage = "User already exists";
 				javaSuccessMessage = "";
 				//			model.addAttribute("errorMessage", "User already exists");
@@ -246,6 +252,7 @@ public class UserController {
 		}
 
 		UserDto userDto = new UserDto();
+		userDto.setUserId(returnedUser.getUserId());
 		userDto.setGlobalErrorMessage(globalErrorMessage);
 		userDto.setGlobalSuccessMessage(globalSuccessMessage);
 
@@ -392,7 +399,12 @@ public class UserController {
 		user.setEmailId(emailId);
 		user.setFullName(fullName);
 		user.setPhoneNo(Long.parseLong(phoneNo));
-		user.setProfilePictureURL(profilePictureUrl);
+		try {
+			user.setProfilePictureURL(ProfilePicture.storeBase64(emailId, profilePictureUrl));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.log(Level.INFO, e.toString());
+		}
 
 		// get user object from java db
 		boolean updateProfileSuccess = userService.updateProfile(user);
@@ -408,6 +420,166 @@ public class UserController {
 
 		return gson.toJson(userDto);
 	}
-	
-	
+
+	@RequestMapping(value="/getUserByEmail", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String getUserByEmail(@RequestBody UserDto requestUserDto)
+
+	{
+
+		String response;
+
+		UserDto userDto = new UserDto();
+
+		JSONObject jsonObject = new JSONObject();
+
+		String emailToSearch = userDto.getEmailId();
+
+		logger.log(Level.INFO, "Searching for email: " + emailToSearch);
+
+		// get user object from java db
+		User user = userService.getUserByEmail(userDto.getEmailId());
+
+		try {
+			user.setProfilePictureURL(ProfilePicture.getBase64(user.getEmailId()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.log(Level.INFO, e.toString());
+		} finally {
+			if(user != null) {			
+				userDto.setUserStatus(true);
+			}
+			else {
+				userDto.setUserStatus(false);
+			}
+		}
+
+		Gson gson = new Gson();
+
+		return gson.toJson(userDto);
+	}
+
+	@RequestMapping(value="/getUserByName", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String getUsersByName(@RequestBody UserDto requestUserDto)
+	{
+		String response;
+
+		UserDto userDto = new UserDto();
+
+		JSONObject jsonObject = new JSONObject();
+
+		String nameToSearch = userDto.getFullName();
+
+		logger.log(Level.INFO, "Searching for name: " + nameToSearch);
+
+		List<User> tempUserList = new ArrayList<>();
+		List<User> userList = new ArrayList<>();
+
+		// get user object from java db
+		tempUserList = userService.getUsersByName(userDto.getFullName());
+
+		// convert url link to base64 form for ui rendering
+		for(User user: tempUserList) {
+			try {
+				user.setProfilePictureURL(ProfilePicture.getBase64(user.getEmailId()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.log(Level.INFO, e.toString());
+			}
+			userList.add(user);
+		}
+
+		if(userList == null || userList.isEmpty()) {			
+			userDto.setUserStatus(false);
+		}
+		else {
+			userDto.setUserStatus(true);
+		}
+
+		userDto.setUserList(userList);
+
+		Gson gson = new Gson();
+
+		return gson.toJson(userDto);
+	}
+
+	@RequestMapping(value="/getAllUsers", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String getAllUsers()
+
+	{
+		List<User> tempUserList = new ArrayList<>();
+		List<User> userList = new ArrayList<>();
+
+		// get user object from java db
+		tempUserList = userService.getAllUsers();
+
+		// convert url link to base64 form for ui rendering
+		for(User user: tempUserList) {
+			try {
+				user.setProfilePictureURL(ProfilePicture.getBase64(user.getEmailId()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.log(Level.INFO, e.toString());
+			}
+			userList.add(user);
+		}
+
+
+		Gson gson = new Gson();
+
+		return gson.toJson(userList);
+	}
+
+	@RequestMapping(value="/addContact", method=RequestMethod.POST,
+			produces="application/json", consumes="application/json")
+	public @ResponseBody String addContact(@RequestBody UserDto requestUserDto)
+	{
+
+		String response;
+
+		UserDto userDto = new UserDto();
+
+		JSONObject jsonObject = new JSONObject();
+
+		String emailId = requestUserDto.getEmailId();
+		String phoneNo = requestUserDto.getPhoneNo();
+		String profilePictureUrl = "";
+		try {
+			profilePictureUrl = ProfilePicture.storeBase64(emailId,
+					requestUserDto.getProfilePictureUrl());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			logger.log(Level.INFO, e1.toString());
+		}
+		String fullName = requestUserDto.getFullName();
+		long userId = requestUserDto.getUserId();		
+
+		logger.log(Level.INFO, emailId + ":" + phoneNo + ":" + profilePictureUrl 
+				+ fullName);
+
+		User userToBeAdded = new User();
+		userToBeAdded.setEmailId(emailId);
+		userToBeAdded.setFullName(fullName);
+		userToBeAdded.setPhoneNo(Long.parseLong(phoneNo));
+		userToBeAdded.setProfilePictureURL(profilePictureUrl);
+		userToBeAdded.setUserId(userId);
+		
+		User currentUser = new User();
+		currentUser.setEmailId(requestUserDto.getRequestCreatorEmail());;
+		
+		boolean addContactSuccess = userService.addUserToUserContacts(userToBeAdded, currentUser);
+
+		if(addContactSuccess) {			
+			userDto.setUserStatus(true);
+		}
+		else {
+			userDto.setUserStatus(false);
+		}
+
+		Gson gson = new Gson();
+
+		return gson.toJson(userDto);
+	}
 }

@@ -2,89 +2,54 @@ package com.gc.chatapp.dao;
 
 import java.util.List;
 
-import com.gc.chatapp.entities.ChatGroup;
 import com.gc.chatapp.entities.ChatMessage;
 import com.gc.chatapp.entities.ChatReminder;
-import com.gc.chatapp.entities.GroupChatMessage;
 import com.gc.chatapp.entities.PolledChatMessage;
 import com.gc.chatapp.entities.PolledResponse;
 import com.gc.chatapp.entities.User;
 
 public interface ChatDao {
+	// Add new user to user contacts
+	// Rachna
+	public boolean addUserToUserContacts(User userToBeAdded, User currentUser);
+
+	// Get all contacts
+	// Utkarsh
+	public List<User> getAllUserContacts(User user);
 	
-	//Create Chat group as a Group Creator
-		// Rajat
-		 ChatGroup createChatGroup(ChatGroup chatGroup, User creator);
+	// Set Chat Message as Starred
+	// Riya
+	public boolean setStarredChatMessage(ChatMessage chatMessage);
 
-		//Admin can add users to chat group
-		// Rajat
-		 boolean addUserToChatGroup(User user, ChatGroup chatGroup);
+	// To fetch all star marked messages to be displayed
+	// Riya
+	public List<ChatMessage> getAllChatMessages(long userId, boolean isStarred);
 
-		//Creator can make participant of the group admin
-		// Rajat
-		 boolean addGroupAdminToChatGroup(User groupAdmin, ChatGroup chatGroup, User user);
+	// Send a message to an User
+	// Utkarsh
+	public boolean sendChatMessage(ChatMessage chatMessage);
 
-		//Group Admin can remove a member from the chat group 
-		// Rajat
-		 boolean removeGroupMemberFromChatGroup(User groupAdmin, ChatGroup chatGroup, User user);
+	// To get messages of a particular user
+	// Utkarsh
+	public List<ChatMessage> getIndividualChatMessages(User user, User contact);
 
-		// Get all chat groups
-		// Rachna
-		 List<ChatGroup> getAllChatGroupsOfAUser(User user);
+	// Store the reminder message for particular schedule date
+	// Deeksha
+	public boolean addChatReminder(ChatReminder chatReminder);
 
-		//Send group chat message
-		// Utkarsh
-		 boolean sendGroupChatMessage(ChatGroup chatGroup, GroupChatMessage groupChatMessage);
+	// Add Polled chat message
+	// Anees
+	public PolledChatMessage addPolledChatMessage(PolledChatMessage polledChatMessage);
 
-		//To get messages of a particular group
-		// Utkarsh
-		 List<ChatMessage> getGroupChatMessages(User user, ChatGroup chatGroup);
-		//Exit from chat group
-		 boolean exitChatGroup(ChatGroup chatGroup, User user);
+	// Get Polled chat message by id
+	// Anees
+	public PolledChatMessage getPolledChatMessageById(long id);
 
-		// Add Polled chat message
-		// Anees
-		 boolean addPolledChatMessage (PolledChatMessage polledChatMessage);
+	// add response of each user
+	public PolledResponse addPolledResponse(PolledResponse polledResponse, PolledChatMessage polledChatMessage);
 
-		//add response of each user
-		 boolean addPolledResponse(PolledResponse polledResponse, PolledChatMessage polledChatMessage);
-
-		// Get all polled chat message responses
-		// Anees
-		 List<PolledResponse> getAllPolledChatMessages(User user, PolledChatMessage polledChatMessage);
-
-		//Delete chat group
-		// Rajat
-		 boolean deleteChatGroup(ChatGroup chatGroup);
-		 
-		//To fetch all star marked messages to be displayed
-		// Riya
-		 List<ChatMessage> getAllChatMessages(long userId, boolean isStarred);
-
-		// Set Chat Message as Starred
-		// Riya
-		 boolean setStarredChatMessage(ChatMessage chatMessage);
-
-		// Get all contacts 
-		// Utkarsh
-		 List<User> getAllUserContacts(User user);
-
-		// Send a message to an User
-		// Utkarsh
-		 boolean sendChatMessage(ChatMessage chatMessage);
-
-		//To get messages of a particular user
-		// Utkarsh
-		 List<ChatMessage> getIndividualChatMessages(User user, User contact);
-
-		//Store the reminder message for particular schedule date
-		// Deeksha
-		 boolean addChatReminder(ChatReminder chatReminder);
-
-		// Add new user to user contacts
-		// Rachna
-		 boolean addUserToUserContacts(User userToBeAdded, User currentUser);
-
-
+	// Get all polled chat message responses
+	// Anees
+	public List<PolledChatMessage> getAllPolledChatMessages(String email);
 
 }

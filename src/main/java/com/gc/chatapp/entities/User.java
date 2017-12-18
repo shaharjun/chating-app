@@ -3,37 +3,51 @@ package com.gc.chatapp.entities;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
 	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "user_id")
 	private long userId;
+
+	@Column(name = "full_name")
 	private String fullName;
+
 	private String password;
+
+	@Column(name = "phone_no")
 	private long phoneNo;
+
+	@Column(name = "email_id", unique = true)
 	private String emailId;
+
+	@Column(name = "profile_picture_url")
 	private String profilePictureURL;
 
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	@JoinTable(name="user_contacts",joinColumns={@JoinColumn(name="userId")},inverseJoinColumns={@JoinColumn(name="contactUserId")})
-	private Set<User> chatContacts;
-	
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="chatContacts")
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
+	private Set<RequestInfo> requestInfo;
+
+	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@JoinTable(name = "user_contacts", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
+			@JoinColumn(name = "contact_user_id") })
 	private Set<User> contacts;
-	
-	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	@JoinTable(name="chartgroup_member",joinColumns={@JoinColumn(name="userId")},inverseJoinColumns={@JoinColumn(name="chatGroupId")})
-	private Set<ChatGroup> chatGroups;
 
 	public long getUserId() {
 		return userId;
@@ -83,14 +97,6 @@ public class User {
 		this.profilePictureURL = profilePictureURL;
 	}
 
-	public Set<User> getChatContacts() {
-		return chatContacts;
-	}
-
-	public void setChatContacts(Set<User> chatContacts) {
-		this.chatContacts = chatContacts;
-	}
-
 	public Set<User> getContacts() {
 		return contacts;
 	}
@@ -99,20 +105,28 @@ public class User {
 		this.contacts = contacts;
 	}
 
-	public Set<ChatGroup> getChatGroups() {
-		return chatGroups;
+	public Set<RequestInfo> getRequestInfo() {
+		return requestInfo;
 	}
 
-	public void setChatGroups(Set<ChatGroup> chatGroups) {
-		this.chatGroups = chatGroups;
+	public void setRequestInfo(Set<RequestInfo> requestInfo) {
+		this.requestInfo = requestInfo;
 	}
 
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", fullName=" + fullName + ", password=" + password + ", phoneNo=" + phoneNo
-				+ ", emailId=" + emailId + ", profilePictureURL=" + profilePictureURL + ", chatContacts=" + chatContacts
-				+ ", contacts=" + contacts + ", chatGroups=" + chatGroups + "]";
+		return "User : [userId=" + userId + ", fullName=" + fullName + ", password=" + password + ", phoneNo=" + phoneNo
+				+ ", emailId=" + emailId + ", profilePictureURL=" + profilePictureURL + ", requestInfo=" + requestInfo
+				+ ", \ncontacts=" + getContactsToString() + "]";
 	}
-	
-	
+
+	private String getContactsToString() {
+		String str = "";
+		if (contacts != null) {
+			for (User user : contacts) {
+				str += user.getEmailId() + " ";
+			}
+		}
+		return str;
+	}
 }

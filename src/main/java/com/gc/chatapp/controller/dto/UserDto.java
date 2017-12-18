@@ -7,7 +7,7 @@ import com.gc.chatapp.entities.User;
 
 public class UserDto {
 	
-	private int userId;
+	private long userId;
 	private String fullName;
 	private String password;
 	private String phoneNo;
@@ -18,7 +18,26 @@ public class UserDto {
 	private String globalSuccessMessage;
 	// to indicate login status, can be removed later
 	private boolean userStatus = false;
+	private List<User> userList = new ArrayList<>();
 	
+	private String requestCreatorEmail; 
+	
+	public String getRequestCreatorEmail() {
+		return requestCreatorEmail;
+	}
+
+	public void setRequestCreatorEmail(String requestCreatorEmail) {
+		this.requestCreatorEmail = requestCreatorEmail;
+	}
+
+	public List<User> getUserList() {
+		return userList;
+	}
+
+	public void setUserList(List<User> userList) {
+		this.userList = userList;
+	}
+
 	public boolean isUserStatus() {
 		return userStatus;
 	}
@@ -33,11 +52,11 @@ public class UserDto {
 		// TODO Auto-generated constructor stub
 	}
 
-	public int getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 

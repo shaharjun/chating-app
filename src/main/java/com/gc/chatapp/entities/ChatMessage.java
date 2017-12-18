@@ -1,13 +1,12 @@
 package com.gc.chatapp.entities;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,35 +14,37 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Type;
-
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
-public class ChatMessage {
+@Table(name = "chat_messages")
+public abstract class ChatMessage {
 
 	@Id
 	@GeneratedValue(strategy= GenerationType.AUTO)
+	@Column(name = "chat_message_id")
 	protected long chatMessageId;
 	
+	@Column(name = "chat_message_text")
 	protected String chatMessageText;
 	
 	@Temporal(TemporalType.DATE)
+	@Column(name = "created_on")
 	protected Date createdOn;
 	
 	@Enumerated(EnumType.STRING)
+	@Column(name = "chat_status")
 	protected ChatStatus chatStatus;
 	
 	@Enumerated(EnumType.STRING)
+	@Column(name = "chat_type")
 	protected ChatType chatType;
 	
-	@Type(type="true_false")
-	protected boolean starred;
-	
 	@ManyToOne(cascade=CascadeType.ALL)
-	@JoinColumn(name="userId")
+	@JoinColumn(name="sender_id")
 	protected User creator;
 
 	public long getChatMessageId() {
@@ -86,14 +87,6 @@ public class ChatMessage {
 		this.chatType = chatType;
 	}
 
-	public boolean isStarred() {
-		return starred;
-	}
-
-	public void setStarred(boolean starred) {
-		this.starred = starred;
-	}
-
 	public User getCreator() {
 		return creator;
 	}
@@ -105,8 +98,8 @@ public class ChatMessage {
 	@Override
 	public String toString() {
 		return "ChatMessage [chatMessageId=" + chatMessageId + ", chatMessageText=" + chatMessageText + ", createdOn="
-				+ createdOn + ", chatStatus=" + chatStatus + ", chatType=" + chatType + ", starred=" + starred
-				+ ", creator=" + creator + "]";
+				+ createdOn + ", chatStatus=" + chatStatus + ", chatType=" + chatType + ", creator=" + creator.getEmailId() + "]";
 	}
+	
 	
 }
